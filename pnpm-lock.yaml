@@ -38,6 +38,9 @@ importers:
       '@openferry/capability-probes':
         specifier: workspace:*
         version: link:../../packages/capability-probes
+      '@openferry/clients':
+        specifier: workspace:*
+        version: link:../../packages/clients
       '@openferry/config-manager':
         specifier: workspace:*
         version: link:../../packages/config-manager
@@ -120,6 +123,8 @@ importers:
       '@openferry/provider-contract':
         specifier: workspace:*
         version: link:../providers/contract
+
+  packages/clients: {}
 
   packages/config-manager:
     dependencies:

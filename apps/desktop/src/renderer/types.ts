@@ -89,6 +89,46 @@ export interface RefreshResult {
   error?: string;
 }
 
+export interface ClientEntry {
+  id: string;
+  [key: string]: unknown;
+}
+
+export interface ClientState {
+  clientId: string;
+  displayName: string;
+  path: string;
+  exists: boolean;
+  readable: boolean;
+  entryCount: number;
+  entries: ClientEntry[];
+  hash: string | null;
+  error?: string;
+  ownedIds: string[];
+  backups: Array<{ name: string; createdAt: string; size: number }>;
+  gatewayUrl: string | null;
+  gatewayRunning: boolean;
+}
+
+export type PlanAction = 'add' | 'update' | 'remove' | 'unchanged' | 'conflict';
+
+export interface PlanItem {
+  id: string;
+  action: PlanAction;
+  before: ClientEntry | null;
+  after: ClientEntry | null;
+  note?: string;
+}
+
+export interface ClientPlan {
+  clientId: string;
+  path: string;
+  baseHash: string | null;
+  items: PlanItem[];
+  nextContent: string;
+  warnings: string[];
+}
+
 export interface OpenFerryApi {
   getStatus(): Promise<StatusPayload>;
   start(): Promise<StatusPayload>;
@@ -117,6 +157,12 @@ export interface OpenFerryApi {
       apiKey?: string;
       allowPrivateNetwork?: boolean;
     }): Promise<ProviderTestResult>;
+  };
+  clients: {
+    state(): Promise<ClientState>;
+    preview(modelIds: string[]): Promise<ClientPlan>;
+    apply(modelIds: string[]): Promise<{ state: ClientState }>;
+    restore(name: string): Promise<ClientState>;
   };
   models: {
     list(): Promise<ModelView[]>;

@@ -1004,3 +1004,95 @@ button {
     justify-content: flex-start;
   }
 }
+
+/* ---------- 客户端 ---------- */
+
+.pick-list,
+.diff-list,
+.backup-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.pick-row {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto auto;
+  align-items: center;
+  gap: 10px;
+  padding: 6px 0;
+  cursor: pointer;
+  border-bottom: 1px solid var(--line);
+}
+
+.pick-list li:last-child .pick-row {
+  border-bottom: 0;
+}
+
+.pick-row input {
+  width: 14px;
+  height: 14px;
+  accent-color: var(--accent);
+}
+
+.pick-name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.diff-row,
+.backup-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 6px 0;
+  border-bottom: 1px solid var(--line);
+  font-size: 12px;
+}
+
+.diff-list li:last-child,
+.backup-list li:last-child {
+  border-bottom: 0;
+}
+
+.diff-tag {
+  flex: none;
+  font-size: 10.5px;
+  padding: 1px 7px;
+  border-radius: var(--r-chip);
+  border: 1px solid var(--line-strong);
+  color: var(--text-faint);
+}
+
+.diff-add {
+  color: var(--accent);
+  border-color: rgba(94, 196, 160, 0.4);
+  background: var(--accent-soft);
+}
+
+.diff-remove {
+  color: #f0a7a9;
+  border-color: rgba(226, 104, 108, 0.4);
+  background: var(--danger-soft);
+}
+
+.diff-conflict {
+  color: var(--warn);
+  border-color: rgba(215, 165, 69, 0.4);
+  background: var(--warn-soft);
+}
+
+.backup-row {
+  justify-content: space-between;
+}
+
+.backup-row > .mono {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}

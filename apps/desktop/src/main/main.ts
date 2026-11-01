@@ -19,6 +19,16 @@ import { OpenAICompatibleProvider } from '@openferry/provider-openai-compatible'
 import type { ProviderAdapter } from '@openferry/provider-contract';
 import { PROBE_VERSION, expiresAt, runAllProbes } from '@openferry/capability-probes';
 import { buildModelViews, refreshModels, type ModelView } from '@openferry/model-registry';
+import {
+  applyPlan,
+  inspectWorkBuddy,
+  isSafeBackupName,
+  listBackups,
+  planWorkBuddy,
+  resolveWorkBuddyPath,
+  restoreBackup,
+  type DesiredEntry,
+} from '@openferry/clients';
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const DATA_DIR = join(homedir(), '.openferry');
@@ -26,6 +36,8 @@ const CONFIG_PATH = join(DATA_DIR, 'config.json');
 const TOKEN_PATH = join(DATA_DIR, 'token');
 const DB_PATH = join(DATA_DIR, 'openferry.db');
 const SECRETS_PATH = join(DATA_DIR, 'secrets.json');
+const BACKUP_DIR = join(DATA_DIR, 'backups');
+const CLIENT_ID = 'workbuddy';
 
 type GatewayState = 'stopped' | 'starting' | 'running' | 'error';
 
@@ -58,6 +70,7 @@ let gateway: Gateway | null = null;
 let state: GatewayState = 'stopped';
 let lastError: string | null = null;
 let currentUrl: string | null = null;
+let gatewayToken: string | null = null;
 let mainWindow: BrowserWindow | null = null;
 let quitting = false;
 
@@ -267,11 +280,13 @@ async function startGateway(): Promise<StatusPayload> {
 
     const { url } = await gateway.start();
     currentUrl = url;
+    gatewayToken = token;
     state = 'running';
   } catch (error) {
     state = 'error';
     gateway = null;
     currentUrl = null;
+    gatewayToken = null;
     lastError = error instanceof Error ? error.message : String(error);
     logger.error('gateway.start_failed', { message: lastError });
   }
@@ -379,6 +394,46 @@ async function testProvider(payload: unknown): Promise<TestResult> {
   } finally {
     clearTimeout(timer);
   }
+}
+
+function buildDesiredEntries(modelIds: string[]): DesiredEntry[] {
+  if (currentUrl === null || gatewayToken === null) {
+    throw new Error('网关未运行，先启动网关再写入客户端配置');
+  }
+  const database = requireDb();
+  const entries: DesiredEntry[] = [];
+
+  for (const id of modelIds) {
+    const model = database.models.get(id);
+    if (!model) continue;
+    entries.push({
+      id,
+      name: model.displayName,
+      url: `${currentUrl}/v1`,
+      // 客户端必须带 Token 才能调用网关；这个 Token 只对本机有效。
+      apiKey: gatewayToken,
+    });
+  }
+  return entries;
+}
+
+async function clientState() {
+  const path = resolveWorkBuddyPath();
+  const client = await inspectWorkBuddy(path);
+  const ownedIds = requireDb().clientEntries.list(CLIENT_ID);
+  const backups = await listBackups(join(BACKUP_DIR, CLIENT_ID));
+
+  return {
+    ...client,
+    ownedIds,
+    backups: backups.map((backup) => ({
+      name: backup.name,
+      createdAt: backup.createdAt,
+      size: backup.size,
+    })),
+    gatewayUrl: currentUrl,
+    gatewayRunning: state === 'running',
+  };
 }
 
 function assertTrustedSender(event: IpcMainInvokeEvent): void {
@@ -508,6 +563,53 @@ function registerIpc(): void {
     database.models.markProbed(modelId, startedAt);
 
     return listModels();
+  });
+
+  guarded('clients:state', async () => clientState());
+
+  guarded('clients:preview', async (payload) => {
+    const { modelIds } = z.object({ modelIds: z.array(z.string().min(1)).max(500) }).parse(payload);
+    const state = await inspectWorkBuddy(resolveWorkBuddyPath());
+    const owned = new Set(requireDb().clientEntries.list(CLIENT_ID));
+    return planWorkBuddy(state, buildDesiredEntries(modelIds), owned);
+  });
+
+  guarded('clients:apply', async (payload) => {
+    const { modelIds } = z.object({ modelIds: z.array(z.string().min(1)).max(500) }).parse(payload);
+    const state = await inspectWorkBuddy(resolveWorkBuddyPath());
+    const owned = new Set(requireDb().clientEntries.list(CLIENT_ID));
+    const plan = planWorkBuddy(state, buildDesiredEntries(modelIds), owned);
+    const result = await applyPlan(plan, { backupDir: BACKUP_DIR });
+
+    if (!result.ok) throw new Error(result.error ?? '写入失败');
+
+    const nextOwned = [...owned].filter((id) => !result.removedIds.includes(id));
+    requireDb().clientEntries.replace(CLIENT_ID, [...nextOwned, ...result.writtenIds]);
+    logger.info('client.applied', {
+      clientId: CLIENT_ID,
+      added: result.writtenIds.length,
+      removed: result.removedIds.length,
+    });
+
+    return { result, state: await clientState() };
+  });
+
+  guarded('clients:restore', async (payload) => {
+    const { name } = z.object({ name: z.string().min(1).max(120) }).parse(payload);
+    if (!isSafeBackupName(name)) throw new Error('备份文件名不合法');
+
+    const target = resolveWorkBuddyPath();
+    await restoreBackup(join(BACKUP_DIR, CLIENT_ID, name), target, {
+      backupDir: BACKUP_DIR,
+      clientId: CLIENT_ID,
+    });
+
+    // 恢复后以文件为准：只保留仍然存在的归属记录。
+    const after = await inspectWorkBuddy(target);
+    requireDb().clientEntries.retain(CLIENT_ID, new Set(after.entries.map((entry) => entry.id)));
+    logger.info('client.restored', { clientId: CLIENT_ID, backup: name });
+
+    return clientState();
   });
 }
 

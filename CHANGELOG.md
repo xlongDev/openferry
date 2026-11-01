@@ -6,6 +6,11 @@
 
 ### Added
 
+- `@openferry/clients`：客户端配置的原子写入、备份、冲突检测与失败还原；WorkBuddy 适配器。
+- 迁移 v3：`client_entries`，记录哪些条目由 OpenFerry 写入。
+- 桌面端「客户端」页：选择模型 → 预览变更 → 写入 → 备份与恢复。
+- 写入必须先预览；预览后文件被外部修改会拒绝写入。
+
 - `@openferry/capability-probes`：对话 / 流式 / 工具调用 / 参数完整性四类探测，结果带有效期。
 - `@openferry/model-registry`：目录刷新（失败保留旧目录）、`ModelView` 组装（能力 + 过期 + 价格状态）。
 - 迁移 v2：`models`、`probe_runs` 表与索引。

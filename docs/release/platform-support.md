@@ -33,6 +33,10 @@
 | 模型目录刷新 | 通过 | 对本地假上游刷新，返回 `+2 / −0`，UI 渲染 2 行、价格显示「未知」 |
 | 能力探测 | 通过 | 四项全过，证据含首字 5ms、工具名、参数 `timezone=Asia/Shanghai` |
 | 探测结论过期 | 通过 | `buildModelView` 对过期结果返回 `accessible: null`（有测试） |
+| 客户端配置写入 | 通过 | 隔离目录 `/tmp/of-wb`：写入后用户手写条目与未知字段原样保留 |
+| 写入冲突拒绝 | 通过 | 预览后改动文件 → 写入被拒，文件保持外部修改后的状态（有测试） |
+| 同 id 冲突跳过 | 通过 | 已存在但非 OpenFerry 写入的条目被标记 `conflict`，不覆盖、不认领 |
+| 从备份恢复 | 通过 | 恢复后文件回到原样，恢复前的状态另存一份备份 |
 | 网关端到端（非流式 / 流式 / 工具调用） | 通过 | `tests/integration/gateway.test.ts`，走真实 HTTP + 假上游 |
 | 客户端断开取消上游 | 通过 | `tests/integration/cancellation.test.ts` 断言上游收到 abort |
 

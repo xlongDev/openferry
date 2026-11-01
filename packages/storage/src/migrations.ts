@@ -67,6 +67,20 @@ export const migrations: Migration[] = [
       `CREATE INDEX IF NOT EXISTS idx_probe_model ON probe_runs (model_id, probe, started_at DESC)`,
     ],
   },
+  {
+    version: 3,
+    name: 'client-entries',
+    statements: [
+      // 记录「哪些条目是我们写进客户端配置的」。
+      // 客户端文件里不能加标记字段（会污染用户配置），所以归属只能记在我们自己的库里。
+      `CREATE TABLE IF NOT EXISTS client_entries (
+         client_id TEXT NOT NULL,
+         entry_id TEXT NOT NULL,
+         written_at TEXT NOT NULL,
+         PRIMARY KEY (client_id, entry_id)
+       )`,
+    ],
+  },
 ];
 
 export interface MigrationResult {

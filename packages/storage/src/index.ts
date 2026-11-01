@@ -15,6 +15,7 @@ import {
   type ProviderInput,
   type ProviderRecord,
 } from './providers.js';
+import { ClientEntryRepository } from './client-entries.js';
 import {
   ModelRepository,
   ProbeRepository,
@@ -34,6 +35,7 @@ export {
   ProviderRepository,
   ModelRepository,
   ProbeRepository,
+  ClientEntryRepository,
   StorageError,
   providerInputSchema,
   type Migration,
@@ -54,6 +56,7 @@ export interface OpenFerryDatabase {
   readonly providers: ProviderRepository;
   readonly models: ModelRepository;
   readonly probes: ProbeRepository;
+  readonly clientEntries: ClientEntryRepository;
   /** 当前 schema 版本，用于诊断信息。 */
   schemaVersion(): number;
   close(): void;
@@ -74,6 +77,7 @@ export function openDatabase(path: string): OpenFerryDatabase {
     providers: new ProviderRepository(db),
     models: new ModelRepository(db),
     probes: new ProbeRepository(db),
+    clientEntries: new ClientEntryRepository(db),
     schemaVersion() {
       return result.to;
     },

@@ -1,17 +1,18 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import type { JSX } from 'react';
 import { Overview, StatusPill } from './Overview.js';
+import { Clients } from './Clients.js';
 import { Models } from './Models.js';
 import { Providers } from './Providers.js';
 import type { LogRecord, StatusPayload } from './types.js';
 
-type Tab = 'overview' | 'providers' | 'models';
+type Tab = 'overview' | 'providers' | 'models' | 'clients';
 
 const NAV: Array<{ id: string; label: string; ready: boolean }> = [
   { id: 'overview', label: '概览', ready: true },
   { id: 'providers', label: '供应商', ready: true },
   { id: 'models', label: '模型', ready: true },
-  { id: 'clients', label: '客户端', ready: false },
+  { id: 'clients', label: '客户端', ready: true },
   { id: 'logs', label: '日志', ready: false },
   { id: 'settings', label: '设置', ready: false },
 ];
@@ -20,6 +21,7 @@ const PAGE_META: Record<Tab, { title: string; sub: string }> = {
   overview: { title: '概览', sub: '本机网关的实时状态。每 1.5 秒刷新一次。' },
   providers: { title: '供应商', sub: '上游端点、密钥引用与启用状态。' },
   models: { title: '模型', sub: '从供应商拉到的目录，以及带有效期的能力结论。' },
+  clients: { title: '客户端', sub: '把模型写进客户端配置，写前备份、写后可恢复。' },
 };
 
 function errorMessage(error: unknown): string {
@@ -113,7 +115,7 @@ export function App(): JSX.Element {
               className={`nav-item ${tab === item.id ? 'is-active' : ''}`}
               disabled={!item.ready}
               onClick={() => {
-                if (item.id === 'overview' || item.id === 'providers' || item.id === 'models') {
+                if (['overview', 'providers', 'models', 'clients'].includes(item.id)) {
                   setTab(item.id as Tab);
                 }
               }}
@@ -165,8 +167,10 @@ export function App(): JSX.Element {
           />
         ) : tab === 'providers' ? (
           <Providers running={status.state === 'running'} />
-        ) : (
+        ) : tab === 'models' ? (
           <Models running={status.state === 'running'} />
+        ) : (
+          <Clients running={status.state === 'running'} />
         )}
       </main>
     </div>

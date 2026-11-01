@@ -20,7 +20,8 @@
     "@openferry/provider-contract": "workspace:*",
     "@openferry/provider-openai-compatible": "workspace:*",
     "@openferry/capability-probes": "workspace:*",
-    "@openferry/model-registry": "workspace:*"
+    "@openferry/model-registry": "workspace:*",
+    "@openferry/clients": "workspace:*"
   },
   "devDependencies": {
     "@types/react": "^19.2.2",

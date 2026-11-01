@@ -33,6 +33,9 @@
     },
     {
       "path": "../../packages/model-registry"
+    },
+    {
+      "path": "../../packages/clients"
     }
   ]
 }
