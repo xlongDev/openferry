@@ -1,5 +1,8 @@
 # OpenFerry
 
+[![CI](https://github.com/xlongDev/openferry/actions/workflows/ci.yml/badge.svg)](https://github.com/xlongDev/openferry/actions/workflows/ci.yml)
+[![License: MIT](https://img.shields.io/badge/license-MIT-2f6f4f.svg)](LICENSE)
+
 本地优先的 AI 编程工具网关。把多个模型供应商（含本地推理服务）收敛成一条 OpenAI 兼容入口，让多个 AI 编程客户端只配置一个地址就能用上全部模型。
 
 > **状态：v0.1.0 骨架版本。** 网关核心链路（协议、流式、工具调用、安全边界）已实现并有测试；持久化、客户端配置写入、能力探测与大部分桌面页面尚未实现。下面的「已实现 / 未实现」清单是准确的，请不要按路线图假设功能可用。
