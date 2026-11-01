@@ -11,6 +11,7 @@
 
 - 启动一个只监听 `127.0.0.1` 的网关，带 Bearer 认证、Host 校验、浏览器来源拦截、体积与并发上限。
 - 在桌面应用里增删改查供应商、切换启用状态、测试连接；密钥写进系统凭据存储，改动即时生效。
+- 刷新模型目录、按供应商筛选搜索，对单个模型跑能力探测（对话 / 流式 / 工具调用 / 参数完整性）。
 - 代理 OpenAI Chat Completions：非流式、SSE 流式、工具调用（含参数分片）、usage。
 - 把上游的认证失败 / 限流 / 超时 / 断流映射成明确的错误码，且不泄露密钥。
 - 客户端断开时取消上游请求并释放连接。
@@ -18,8 +19,9 @@
 
 ## 现在还不能做什么
 
-- 模型、客户端、设置页面（导航里标了「未实现」）。
-- 模型目录缓存、能力探测、客户端配置导入 / 备份 / 恢复。
+- 客户端、日志、设置页面（导航里标了「未实现」）。
+- 客户端配置导入 / 备份 / 恢复。
+- 批量探测并发池、价格来源（`/models` 不返回价格，目前显示「价格未知」）。
 - Responses API、Anthropic Messages 适配。
 - 路由策略、熔断、故障转移、重试。
 - 打包安装包；Windows / Linux 运行验证。
@@ -117,7 +119,9 @@ packages/core         错误分类、脱敏、日志、地址守卫
 packages/protocols    canonical / openai-chat
 packages/providers    contract / openai-compatible
 packages/gateway      HTTP 服务、认证、限流、超时
-packages/storage      node:sqlite、版本化迁移、供应商仓储
+packages/storage      node:sqlite、版本化迁移、供应商/模型/探测仓储
+packages/capability-probes  能力探测与有效期策略
+packages/model-registry     目录刷新与视图组装
 packages/secrets      凭据存储抽象（桌面端接 safeStorage）
 packages/config-manager  配置文件解析与供应商构造
 packages/testkit      假上游

@@ -18,4 +18,10 @@ contextBridge.exposeInMainWorld('openferry', {
     remove: (id) => ipcRenderer.invoke('providers:remove', { id }),
     test: (input) => ipcRenderer.invoke('providers:test', input),
   },
+
+  models: {
+    list: () => ipcRenderer.invoke('models:list'),
+    refresh: () => ipcRenderer.invoke('models:refresh'),
+    probe: (modelId) => ipcRenderer.invoke('models:probe', { modelId }),
+  },
 });

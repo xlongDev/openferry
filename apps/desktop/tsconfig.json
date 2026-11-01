@@ -27,6 +27,12 @@
     },
     {
       "path": "../../packages/providers/openai-compatible"
+    },
+    {
+      "path": "../../packages/capability-probes"
+    },
+    {
+      "path": "../../packages/model-registry"
     }
   ]
 }

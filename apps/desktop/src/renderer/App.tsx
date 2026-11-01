@@ -1,15 +1,16 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import type { JSX } from 'react';
 import { Overview, StatusPill } from './Overview.js';
+import { Models } from './Models.js';
 import { Providers } from './Providers.js';
 import type { LogRecord, StatusPayload } from './types.js';
 
-type Tab = 'overview' | 'providers';
+type Tab = 'overview' | 'providers' | 'models';
 
 const NAV: Array<{ id: string; label: string; ready: boolean }> = [
   { id: 'overview', label: '概览', ready: true },
   { id: 'providers', label: '供应商', ready: true },
-  { id: 'models', label: '模型', ready: false },
+  { id: 'models', label: '模型', ready: true },
   { id: 'clients', label: '客户端', ready: false },
   { id: 'logs', label: '日志', ready: false },
   { id: 'settings', label: '设置', ready: false },
@@ -18,6 +19,7 @@ const NAV: Array<{ id: string; label: string; ready: boolean }> = [
 const PAGE_META: Record<Tab, { title: string; sub: string }> = {
   overview: { title: '概览', sub: '本机网关的实时状态。每 1.5 秒刷新一次。' },
   providers: { title: '供应商', sub: '上游端点、密钥引用与启用状态。' },
+  models: { title: '模型', sub: '从供应商拉到的目录，以及带有效期的能力结论。' },
 };
 
 function errorMessage(error: unknown): string {
@@ -111,7 +113,9 @@ export function App(): JSX.Element {
               className={`nav-item ${tab === item.id ? 'is-active' : ''}`}
               disabled={!item.ready}
               onClick={() => {
-                if (item.id === 'overview' || item.id === 'providers') setTab(item.id);
+                if (item.id === 'overview' || item.id === 'providers' || item.id === 'models') {
+                  setTab(item.id as Tab);
+                }
               }}
               title={item.ready ? undefined : '这一页还没实现'}
             >
@@ -159,8 +163,10 @@ export function App(): JSX.Element {
             onOpenDataDir={() => void api.openDataDir()}
             onGotoProviders={() => setTab('providers')}
           />
-        ) : (
+        ) : tab === 'providers' ? (
           <Providers running={status.state === 'running'} />
+        ) : (
+          <Models running={status.state === 'running'} />
         )}
       </main>
     </div>

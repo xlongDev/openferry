@@ -18,7 +18,9 @@
     "@openferry/storage": "workspace:*",
     "@openferry/secrets": "workspace:*",
     "@openferry/provider-contract": "workspace:*",
-    "@openferry/provider-openai-compatible": "workspace:*"
+    "@openferry/provider-openai-compatible": "workspace:*",
+    "@openferry/capability-probes": "workspace:*",
+    "@openferry/model-registry": "workspace:*"
   },
   "devDependencies": {
     "@types/react": "^19.2.2",

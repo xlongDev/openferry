@@ -34,6 +34,39 @@ export const migrations: Migration[] = [
       `CREATE INDEX IF NOT EXISTS idx_providers_enabled ON providers (enabled)`,
     ],
   },
+  {
+    version: 2,
+    name: 'models-and-probes',
+    statements: [
+      `CREATE TABLE IF NOT EXISTS models (
+         id TEXT PRIMARY KEY,
+         provider_id TEXT NOT NULL,
+         upstream_id TEXT NOT NULL,
+         display_name TEXT NOT NULL,
+         source TEXT NOT NULL,
+         observed_at TEXT NOT NULL,
+         created_at INTEGER,
+         owned_by TEXT,
+         pricing_json TEXT,
+         last_probed_at TEXT,
+         UNIQUE (provider_id, upstream_id)
+       )`,
+      `CREATE INDEX IF NOT EXISTS idx_models_provider ON models (provider_id)`,
+      `CREATE TABLE IF NOT EXISTS probe_runs (
+         id INTEGER PRIMARY KEY AUTOINCREMENT,
+         model_id TEXT NOT NULL,
+         probe TEXT NOT NULL,
+         status TEXT NOT NULL,
+         started_at TEXT NOT NULL,
+         duration_ms INTEGER NOT NULL,
+         error_code TEXT,
+         evidence TEXT,
+         expires_at TEXT NOT NULL,
+         probe_version TEXT NOT NULL
+       )`,
+      `CREATE INDEX IF NOT EXISTS idx_probe_model ON probe_runs (model_id, probe, started_at DESC)`,
+    ],
+  },
 ];
 
 export interface MigrationResult {

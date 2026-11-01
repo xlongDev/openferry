@@ -36,6 +36,12 @@
     },
     {
       "path": "./packages/secrets"
+    },
+    {
+      "path": "./packages/capability-probes"
+    },
+    {
+      "path": "./packages/model-registry"
     }
   ]
 }

@@ -30,6 +30,9 @@
 | 供应商 CRUD（桌面端） | 通过 | 经真实 IPC：创建 → 列表刷新 → 网关 `providers` 立即包含新 id → 停用 → 删除 |
 | 密钥加密存储 | 通过 | `safeStorage` 可用（`secrets: "encrypted"`），数据库内查不到密钥 |
 | 连接测试（失败路径） | 通过 | 指向 `https://127.0.0.1:9/v1` 返回 `ok:false` 且带错误，说明真的发了请求 |
+| 模型目录刷新 | 通过 | 对本地假上游刷新，返回 `+2 / −0`，UI 渲染 2 行、价格显示「未知」 |
+| 能力探测 | 通过 | 四项全过，证据含首字 5ms、工具名、参数 `timezone=Asia/Shanghai` |
+| 探测结论过期 | 通过 | `buildModelView` 对过期结果返回 `accessible: null`（有测试） |
 | 网关端到端（非流式 / 流式 / 工具调用） | 通过 | `tests/integration/gateway.test.ts`，走真实 HTTP + 假上游 |
 | 客户端断开取消上游 | 通过 | `tests/integration/cancellation.test.ts` 断言上游收到 abort |
 

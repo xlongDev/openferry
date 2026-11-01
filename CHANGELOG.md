@@ -6,6 +6,10 @@
 
 ### Added
 
+- `@openferry/capability-probes`：对话 / 流式 / 工具调用 / 参数完整性四类探测，结果带有效期。
+- `@openferry/model-registry`：目录刷新（失败保留旧目录）、`ModelView` 组装（能力 + 过期 + 价格状态）。
+- 迁移 v2：`models`、`probe_runs` 表与索引。
+- 桌面端「模型」页：刷新目录、按供应商筛选、搜索、单项检测、能力徽章。
 - `@openferry/storage`：`node:sqlite` 数据库、版本化迁移（事务 + 失败回滚）、`ProviderRepository`。
 - `@openferry/secrets`：`SecretStore` 抽象、内存实现、文件实现（CLI 兜底，0600）。
 - 桌面端供应商管理：新建 / 编辑 / 停用 / 删除 / 连接测试，密钥写入系统凭据存储。
@@ -14,7 +18,9 @@
 
 ### Changed
 
-- 概览页拆分为独立组件；「供应商」导航项已启用。
+- 概览页拆分为独立组件；「供应商」「模型」导航项已启用。
+- 删除供应商或修改端点时，级联清理模型目录与探测记录。
+- `@openferry/testkit` 支持 `route(request)` 按请求内容选响应（并发测试不再依赖脚本顺序）。
 - 密钥 API 改用 Electron 45 的异步变体（`isAsyncEncryptionAvailable` / `encryptStringAsync` / `decryptStringAsync`）。
 
 ### Security

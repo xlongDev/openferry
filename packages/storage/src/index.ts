@@ -15,23 +15,45 @@ import {
   type ProviderInput,
   type ProviderRecord,
 } from './providers.js';
+import {
+  ModelRepository,
+  ProbeRepository,
+  type ModelInput,
+  type ModelPricing,
+  type ModelRecord,
+  type ProbeInput,
+  type ProbeKind,
+  type ProbeRecord,
+  type ProbeStatus,
+} from './models.js';
 
 export {
   migrate,
   applyMigrations,
   migrations,
   ProviderRepository,
+  ModelRepository,
+  ProbeRepository,
   StorageError,
   providerInputSchema,
   type Migration,
   type MigrationResult,
   type ProviderInput,
   type ProviderRecord,
+  type ModelInput,
+  type ModelPricing,
+  type ModelRecord,
+  type ProbeInput,
+  type ProbeKind,
+  type ProbeRecord,
+  type ProbeStatus,
 };
 
 export interface OpenFerryDatabase {
   readonly raw: DatabaseSync;
   readonly providers: ProviderRepository;
+  readonly models: ModelRepository;
+  readonly probes: ProbeRepository;
   /** 当前 schema 版本，用于诊断信息。 */
   schemaVersion(): number;
   close(): void;
@@ -50,6 +72,8 @@ export function openDatabase(path: string): OpenFerryDatabase {
   return {
     raw: db,
     providers: new ProviderRepository(db),
+    models: new ModelRepository(db),
+    probes: new ProbeRepository(db),
     schemaVersion() {
       return result.to;
     },

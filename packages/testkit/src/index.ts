@@ -42,6 +42,11 @@ export interface FakeUpstream {
 export interface FakeUpstreamOptions {
   /** 依次消费；用完后重复最后一步。 */
   script?: FakeStep[];
+  /**
+   * 按请求内容选响应，优先于 `script`。
+   * 并发请求（比如同时跑多个探测）必须用它，否则脚本顺序会错位。
+   */
+  route?: (request: RecordedRequest) => FakeStep | undefined;
   /** 期望的 Bearer token；不匹配则返回 401。 */
   requireToken?: string;
 }
@@ -91,7 +96,10 @@ export async function startFakeUpstream(options: FakeUpstreamOptions = {}): Prom
       }
     }
 
-    const step = script[Math.min(cursor, script.length - 1)] ?? DEFAULT_STEP;
+    const step =
+      options.route?.(requests[requests.length - 1] as RecordedRequest) ??
+      script[Math.min(cursor, script.length - 1)] ??
+      DEFAULT_STEP;
     cursor += 1;
 
     if (step.delayMs) await delay(step.delayMs);

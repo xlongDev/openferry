@@ -17,6 +17,8 @@ import {
 import type { SecretStore } from '@openferry/secrets';
 import { OpenAICompatibleProvider } from '@openferry/provider-openai-compatible';
 import type { ProviderAdapter } from '@openferry/provider-contract';
+import { PROBE_VERSION, expiresAt, runAllProbes } from '@openferry/capability-probes';
+import { buildModelViews, refreshModels, type ModelView } from '@openferry/model-registry';
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const DATA_DIR = join(homedir(), '.openferry');
@@ -308,9 +310,16 @@ async function listProviders(): Promise<ProviderView[]> {
   }));
 }
 
-const createPayloadSchema = providerInputSchema.extend({
-  apiKey: z.string().max(4096).optional(),
-});
+async function listModels(): Promise<ModelView[]> {
+  const database = requireDb();
+  const models = database.models.list();
+  const probes = new Map(
+    models.map((model) => [model.id, database.probes.latestForModel(model.id)]),
+  );
+  return buildModelViews(models, probes);
+}
+
+const createPayloadSchema = providerInputSchema.extend({ apiKey: z.string().max(4096).optional() });
 
 const updatePayloadSchema = z.object({
   id: z.string().min(1),
@@ -424,6 +433,9 @@ function registerIpc(): void {
 
   guarded('providers:update', async (payload) => {
     const parsed = updatePayloadSchema.parse(payload);
+    const before = requireDb().providers.get(parsed.id);
+    if (!before) throw new Error(`供应商 ${parsed.id} 不存在`);
+
     if (parsed.apiKey !== undefined) {
       if (parsed.apiKey.length === 0) {
         await secrets.delete(parsed.id);
@@ -434,6 +446,17 @@ function registerIpc(): void {
       }
     }
     requireDb().providers.update(parsed.id, parsed.patch);
+
+    // 换了端点，旧的能力结论对应的是另一个上游，必须作废。
+    const endpointChanged =
+      (parsed.patch.baseUrl !== undefined && parsed.patch.baseUrl !== before.baseUrl) ||
+      (parsed.patch.allowPrivateNetwork !== undefined &&
+        parsed.patch.allowPrivateNetwork !== before.allowPrivateNetwork);
+    if (endpointChanged) {
+      requireDb().probes.deleteForProvider(parsed.id);
+      requireDb().models.removeForProvider(parsed.id);
+    }
+
     await reloadProviders();
     return listProviders();
   });
@@ -441,12 +464,51 @@ function registerIpc(): void {
   guarded('providers:remove', async (payload) => {
     const { id } = z.object({ id: z.string().min(1) }).parse(payload);
     await secrets.delete(id);
+    requireDb().probes.deleteForProvider(id);
     requireDb().providers.remove(id);
+    requireDb().models.removeForProvider(id);
     await reloadProviders();
     return listProviders();
   });
 
   guarded('providers:test', async (payload) => testProvider(payload));
+
+  guarded('models:list', async () => listModels());
+
+  guarded('models:refresh', async () => {
+    const results = await refreshModels(await buildAdapters(), requireDb().models);
+    return { results, models: await listModels() };
+  });
+
+  guarded('models:probe', async (payload) => {
+    const { modelId } = z.object({ modelId: z.string().min(1).max(300) }).parse(payload);
+    const database = requireDb();
+    const model = database.models.get(modelId);
+    if (!model) throw new Error(`模型 ${modelId} 不在目录里，先刷新一次目录`);
+
+    const adapter = (await buildAdapters()).find((item) => item.id === model.providerId);
+    if (!adapter) throw new Error(`供应商 ${model.providerId} 未启用，无法检测`);
+
+    const outcomes = await runAllProbes(adapter, modelId, { requestId: `probe-${Date.now()}` });
+    const startedAt = new Date().toISOString();
+
+    for (const outcome of outcomes) {
+      database.probes.record({
+        modelId,
+        probe: outcome.probe,
+        status: outcome.status,
+        startedAt,
+        durationMs: outcome.durationMs,
+        ...(outcome.errorCode === undefined ? {} : { errorCode: outcome.errorCode }),
+        ...(outcome.evidence === undefined ? {} : { evidence: outcome.evidence }),
+        expiresAt: expiresAt(outcome.status, outcome.errorCode),
+        probeVersion: PROBE_VERSION,
+      });
+    }
+    database.models.markProbed(modelId, startedAt);
+
+    return listModels();
+  });
 }
 
 function createWindow(): void {

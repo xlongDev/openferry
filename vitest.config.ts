@@ -18,6 +18,8 @@ export default defineConfig({
       '@openferry/provider-openai-compatible': pkg('providers/openai-compatible'),
       '@openferry/config-manager': pkg('config-manager'),
       '@openferry/storage': pkg('storage'),
+      '@openferry/capability-probes': pkg('capability-probes'),
+      '@openferry/model-registry': pkg('model-registry'),
       '@openferry/secrets': pkg('secrets'),
       '@openferry/testkit': pkg('testkit'),
       '@openferry/gateway': pkg('gateway'),
