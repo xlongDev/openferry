@@ -1,0 +1,135 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  NODE_VERSION: '22.22.2'
+
+jobs:
+  verify:
+    name: format / typecheck / lint / test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 12.15.0
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: pnpm
+
+      - name: Install
+        run: pnpm install --frozen-lockfile
+
+      - name: Format check
+        run: pnpm format:check
+
+      - name: Typecheck and build
+        run: pnpm build
+
+      - name: Lint
+        run: pnpm lint
+
+      - name: Test
+        run: pnpm test
+
+      - name: Upload build output
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: dist
+          path: |
+            packages/*/dist
+            packages/*/*/dist
+            apps/*/dist
+          if-no-files-found: ignore
+          retention-days: 3
+
+  boundaries:
+    name: module boundaries
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      # 网关核心不允许依赖 Electron：否则无法在 CLI 与 CI 中运行。
+      - name: gateway must not import electron
+        run: |
+          if grep -rn "from 'electron'" packages/gateway/src; then
+            echo "::error::packages/gateway must not depend on electron"
+            exit 1
+          fi
+
+      # 渲染层不允许触碰 Node 内置模块。
+      - name: renderer must not import node builtins
+        run: |
+          if grep -rnE "from 'node:" apps/desktop/src/renderer; then
+            echo "::error::renderer must not import node builtins"
+            exit 1
+          fi
+
+      # 协议层不允许选择供应商或直接发请求。
+      - name: protocols must stay transport-free
+        run: |
+          if grep -rnE "fetch\(|node:http" packages/protocols/*/src; then
+            echo "::error::protocol packages must not perform IO"
+            exit 1
+          fi
+
+  audit:
+    name: dependency audit
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 12.15.0
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: pnpm
+
+      - run: pnpm install --frozen-lockfile
+
+      - name: pnpm audit (high and above)
+        run: pnpm audit --audit-level high
+        continue-on-error: false
+
+  build-desktop:
+    name: desktop build (${{ matrix.os }})
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [macos-latest, ubuntu-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 12.15.0
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: pnpm
+
+      - run: pnpm install --frozen-lockfile
+
+      - name: Build desktop bundles
+        run: pnpm --filter @openferry/desktop build
+
+      # 这里只证明「能构建」。能否启动、是否通过冒烟测试属于平台验证，
+      # 见 docs/release/platform-support.md。不要把这一条当成平台支持。

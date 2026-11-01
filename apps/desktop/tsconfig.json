@@ -1,0 +1,14 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "rootDir": "src/main",
+    "outDir": "dist/main",
+    "types": ["node"]
+  },
+  "include": ["src/main/**/*.ts"],
+  "references": [
+    { "path": "../../packages/core" },
+    { "path": "../../packages/gateway" },
+    { "path": "../../packages/config-manager" }
+  ]
+}

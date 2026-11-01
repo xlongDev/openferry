@@ -1,0 +1,13 @@
+node_modules/
+dist/
+release/
+*.tsbuildinfo
+.env
+.env.*
+!.env.example
+.DS_Store
+coverage/
+.vitest/
+*.log
+.openferry/
+.workbuddy-ai/

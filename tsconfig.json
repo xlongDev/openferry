@@ -1,0 +1,15 @@
+{
+  "files": [],
+  "references": [
+    { "path": "./packages/core" },
+    { "path": "./packages/protocols/canonical" },
+    { "path": "./packages/protocols/openai-chat" },
+    { "path": "./packages/providers/contract" },
+    { "path": "./packages/providers/openai-compatible" },
+    { "path": "./packages/config-manager" },
+    { "path": "./packages/testkit" },
+    { "path": "./packages/gateway" },
+    { "path": "./apps/gateway-cli" },
+    { "path": "./apps/desktop" }
+  ]
+}

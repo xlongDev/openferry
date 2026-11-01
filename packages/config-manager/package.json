@@ -1,0 +1,22 @@
+{
+  "name": "@openferry/config-manager",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    }
+  },
+  "scripts": {
+    "build": "tsc -b"
+  },
+  "dependencies": {
+    "@openferry/provider-contract": "workspace:*",
+    "@openferry/provider-openai-compatible": "workspace:*",
+    "zod": "^4.6.7"
+  }
+}
