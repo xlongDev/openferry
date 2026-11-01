@@ -10,19 +10,19 @@
 ## 现在能做什么
 
 - 启动一个只监听 `127.0.0.1` 的网关，带 Bearer 认证、Host 校验、浏览器来源拦截、体积与并发上限。
+- 在桌面应用里增删改查供应商、切换启用状态、测试连接；密钥写进系统凭据存储，改动即时生效。
 - 代理 OpenAI Chat Completions：非流式、SSE 流式、工具调用（含参数分片）、usage。
 - 把上游的认证失败 / 限流 / 超时 / 断流映射成明确的错误码，且不泄露密钥。
 - 客户端断开时取消上游请求并释放连接。
-- 桌面应用展示真实网关状态，可启动 / 停止 / 重启，日志只记录结构化元数据。
+- 概览页展示真实网关状态，可启动 / 停止 / 重启，日志只记录结构化元数据。
 
 ## 现在还不能做什么
 
-- 供应商、模型、客户端、设置页面（导航里标了「未实现」）。
-- 数据持久化（SQLite）、凭据加密存储。
-- 能力探测、客户端配置导入 / 备份 / 恢复。
+- 模型、客户端、设置页面（导航里标了「未实现」）。
+- 模型目录缓存、能力探测、客户端配置导入 / 备份 / 恢复。
 - Responses API、Anthropic Messages 适配。
 - 路由策略、熔断、故障转移、重试。
-- Windows / Linux 平台验证。
+- 打包安装包；Windows / Linux 运行验证。
 
 完整清单见 [`docs/roadmap.md`](docs/roadmap.md)。
 
@@ -38,7 +38,9 @@ pnpm test
 
 ### 配置供应商
 
-配置文件：`~/.openferry/config.json`（桌面应用与 CLI 共用）。
+**桌面应用**：打开「供应商」页，填 Base URL 和 API Key 即可。密钥进系统凭据存储（macOS Keychain / Windows DPAPI），数据库只记引用名。改完立刻生效。
+
+**CLI**：读 `~/.openferry/config.json`（桌面端只在数据库为空时导入一次，之后以数据库为准）。
 
 ```json
 {
@@ -60,7 +62,7 @@ pnpm test
 }
 ```
 
-密钥只通过环境变量引用（`apiKeyEnv`），配置文件里不写明文。访问本地模型必须显式打开 `allowPrivateNetwork`，这是 SSRF 防护的一部分。
+访问本地模型必须显式打开 `allowPrivateNetwork`，这是 SSRF 防护的一部分。配置文件里不写明文密钥，只引用环境变量。
 
 ### 启动
 
@@ -115,11 +117,22 @@ packages/core         错误分类、脱敏、日志、地址守卫
 packages/protocols    canonical / openai-chat
 packages/providers    contract / openai-compatible
 packages/gateway      HTTP 服务、认证、限流、超时
+packages/storage      node:sqlite、版本化迁移、供应商仓储
+packages/secrets      凭据存储抽象（桌面端接 safeStorage）
 packages/config-manager  配置文件解析与供应商构造
 packages/testkit      假上游
 tests/integration     网关端到端测试
 docs/                 架构、协议、安全、ADR、路线图
 ```
+
+数据目录 `~/.openferry/`：
+
+| 文件           | 内容                                               |
+| -------------- | -------------------------------------------------- |
+| `openferry.db` | 供应商配置（SQLite，不含密钥）                     |
+| `secrets.json` | 加密后的密钥（base64，密钥本体由系统凭据存储保护） |
+| `token`        | 网关访问 Token（0600）                             |
+| `config.json`  | 可选的 CLI 配置，桌面端仅在首次运行导入            |
 
 ## 开发
 

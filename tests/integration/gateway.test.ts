@@ -1,4 +1,5 @@
 import { afterEach, describe, expect, it } from 'vitest';
+import { defaultCapabilities } from '@openferry/canonical';
 import { chatSseChunks } from '@openferry/testkit';
 import {
   authHeaders,
@@ -210,6 +211,60 @@ describe('streaming', () => {
     const res = await postChat(harness.url, basicChatBody({ stream: true }));
     const text = await readAllText(res);
     expect(text).toContain('invalid JSON');
+  });
+});
+
+describe('provider hot swap', () => {
+  it('replaces the provider list without restarting the gateway', async () => {
+    harness = await setupGateway();
+    expect(harness.gateway.stats().providers).toEqual(['fake']);
+
+    const replacement = {
+      id: 'second',
+      capabilities: defaultCapabilities,
+      listModels: async () => [],
+      send: async () => ({
+        id: 'x',
+        model: 'm',
+        createdAt: 0,
+        message: {
+          role: 'assistant' as const,
+          content: [{ type: 'text' as const, text: 'from second' }],
+        },
+        finishReason: 'stop' as const,
+        warnings: [],
+      }),
+      async *stream() {
+        yield { type: 'done' as const, finishReason: 'stop' as const };
+      },
+    };
+
+    harness.gateway.setProviders([replacement]);
+    expect(harness.gateway.stats().providers).toEqual(['second']);
+
+    const res = await postChat(harness.url, {
+      model: 'second/m',
+      messages: [{ role: 'user', content: 'hi' }],
+    });
+    expect(res.status).toBe(200);
+    const body = (await res.json()) as any;
+    expect(body.choices[0].message.content).toBe('from second');
+  });
+
+  it('rejects a duplicate provider id instead of silently keeping one', async () => {
+    harness = await setupGateway();
+    const provider = {
+      id: 'dup',
+      capabilities: defaultCapabilities,
+      listModels: async () => [],
+      send: async () => {
+        throw new Error('unused');
+      },
+      async *stream() {
+        yield { type: 'done' as const, finishReason: 'stop' as const };
+      },
+    };
+    expect(() => harness!.gateway.setProviders([provider, { ...provider }])).toThrow(/duplicate/);
   });
 });
 

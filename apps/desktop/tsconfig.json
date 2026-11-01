@@ -7,8 +7,26 @@
   },
   "include": ["src/main/**/*.ts"],
   "references": [
-    { "path": "../../packages/core" },
-    { "path": "../../packages/gateway" },
-    { "path": "../../packages/config-manager" }
+    {
+      "path": "../../packages/core"
+    },
+    {
+      "path": "../../packages/gateway"
+    },
+    {
+      "path": "../../packages/config-manager"
+    },
+    {
+      "path": "../../packages/storage"
+    },
+    {
+      "path": "../../packages/secrets"
+    },
+    {
+      "path": "../../packages/providers/contract"
+    },
+    {
+      "path": "../../packages/providers/openai-compatible"
+    }
   ]
 }

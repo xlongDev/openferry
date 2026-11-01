@@ -14,7 +14,11 @@
     "@openferry/config-manager": "workspace:*",
     "@openferry/core": "workspace:*",
     "@openferry/gateway": "workspace:*",
-    "zod": "^4.6.7"
+    "zod": "^4.6.7",
+    "@openferry/storage": "workspace:*",
+    "@openferry/secrets": "workspace:*",
+    "@openferry/provider-contract": "workspace:*",
+    "@openferry/provider-openai-compatible": "workspace:*"
   },
   "devDependencies": {
     "@types/react": "^19.2.2",

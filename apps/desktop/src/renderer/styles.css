@@ -561,3 +561,281 @@ button {
   color: var(--text-faint);
   font-size: 12px;
 }
+
+/* ---------- 区块标题 ---------- */
+
+.stack {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.section-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.section-title {
+  margin: 0;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.section-sub {
+  margin: 4px 0 0;
+  color: var(--text-faint);
+  font-size: 12px;
+  max-width: 62ch;
+  line-height: 1.6;
+}
+
+.section-note {
+  margin: 0;
+  color: var(--text-faint);
+  font-size: 11px;
+  line-height: 1.7;
+}
+
+/* ---------- 表单 ---------- */
+
+.form-card .card-head h3 {
+  margin: 0;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--text-dim);
+}
+
+.form-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+}
+
+@media (max-width: 820px) {
+  .form-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  min-width: 0;
+}
+
+.field-wide {
+  grid-column: 1 / -1;
+}
+
+.field-label {
+  font-size: 11px;
+  color: var(--text-dim);
+  letter-spacing: 0.03em;
+}
+
+.field-hint {
+  font-size: 11px;
+  color: var(--text-faint);
+  line-height: 1.5;
+}
+
+.input {
+  width: 100%;
+  padding: 7px 10px;
+  border-radius: var(--r-control);
+  border: 1px solid var(--line-strong);
+  background: var(--bg);
+  color: var(--text);
+  font-family: inherit;
+  font-size: 12.5px;
+  transition:
+    border-color 140ms ease,
+    background 140ms ease;
+}
+
+.input:focus {
+  outline: none;
+  border-color: var(--accent);
+  background: #0d0f12;
+}
+
+.input:disabled {
+  color: var(--text-faint);
+  background: var(--surface-raised);
+  cursor: not-allowed;
+}
+
+.input::placeholder {
+  color: #4e565f;
+}
+
+.checkbox {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 4px 9px;
+  align-items: center;
+  font-size: 12.5px;
+  cursor: pointer;
+}
+
+.checkbox input {
+  width: 14px;
+  height: 14px;
+  accent-color: var(--accent);
+}
+
+.checkbox .field-hint {
+  grid-column: 2;
+}
+
+/* ---------- 供应商列表 ---------- */
+
+.provider-table {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.provider-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 11px 0;
+  border-bottom: 1px solid var(--line);
+}
+
+.provider-item:first-child {
+  padding-top: 0;
+}
+
+.provider-item:last-child {
+  border-bottom: 0;
+  padding-bottom: 0;
+}
+
+.provider-item.is-off {
+  opacity: 0.55;
+}
+
+.provider-main {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  min-width: 0;
+}
+
+.dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  margin-top: 6px;
+  flex: none;
+}
+
+.dot-on {
+  background: var(--accent);
+}
+
+.dot-off {
+  background: var(--text-faint);
+}
+
+.provider-text {
+  min-width: 0;
+}
+
+.provider-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.provider-id,
+.provider-url {
+  font-size: 11px;
+  color: var(--text-faint);
+}
+
+.provider-url {
+  margin-top: 2px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 46ch;
+}
+
+.tag {
+  font-size: 10px;
+  padding: 1px 6px;
+  border-radius: var(--r-chip);
+  border: 1px solid rgba(94, 196, 160, 0.32);
+  color: var(--accent);
+}
+
+.tag-muted {
+  border-color: var(--line-strong);
+  color: var(--text-faint);
+}
+
+.provider-side {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
+/* ---------- 小按钮与结果 ---------- */
+
+.btn-small {
+  padding: 3px 9px;
+  font-size: 11.5px;
+  border-radius: var(--r-chip);
+}
+
+.btn-danger {
+  border-color: rgba(226, 104, 108, 0.45);
+  color: #f0a7a9;
+  background: var(--danger-soft);
+}
+
+.btn-danger:hover:not(:disabled) {
+  background: rgba(226, 104, 108, 0.2);
+  border-color: var(--danger);
+}
+
+.test-badge {
+  font-family: var(--mono);
+  font-size: 10.5px;
+  padding: 2px 7px;
+  border-radius: var(--r-chip);
+  white-space: nowrap;
+  max-width: 26ch;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.test-ok {
+  color: var(--accent);
+  background: var(--accent-soft);
+}
+
+.test-fail {
+  color: #f0a7a9;
+  background: var(--danger-soft);
+}
+
+.banner-warn {
+  background: var(--warn-soft);
+  border: 1px solid rgba(215, 165, 69, 0.3);
+  color: #e2c07a;
+}

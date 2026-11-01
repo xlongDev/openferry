@@ -12,6 +12,8 @@ export interface StatusPayload {
   configExists: boolean;
   lastError: string | null;
   version: string;
+  schemaVersion: number;
+  secretStore: 'encrypted' | 'file' | 'memory';
 }
 
 export interface LogRecord {
@@ -19,6 +21,34 @@ export interface LogRecord {
   level: 'debug' | 'info' | 'warn' | 'error';
   event: string;
   [key: string]: unknown;
+}
+
+export interface ProviderView {
+  id: string;
+  displayName: string;
+  kind: 'openai-compatible';
+  baseUrl: string;
+  credentialRef: string | null;
+  allowPrivateNetwork: boolean;
+  enabled: boolean;
+  createdAt: string;
+  updatedAt: string;
+  hasCredential: boolean;
+}
+
+export interface ProviderDraft {
+  id: string;
+  displayName: string;
+  baseUrl: string;
+  apiKey: string;
+  allowPrivateNetwork: boolean;
+}
+
+export interface ProviderTestResult {
+  ok: boolean;
+  models: number;
+  durationMs: number;
+  error?: string;
 }
 
 export interface OpenFerryApi {
@@ -29,6 +59,27 @@ export interface OpenFerryApi {
   recentLogs(limit: number): Promise<LogRecord[]>;
   appInfo(): Promise<{ version: string; dataDir: string; configPath: string }>;
   openDataDir(): Promise<{ ok: boolean }>;
+  providers: {
+    list(): Promise<ProviderView[]>;
+    create(input: ProviderDraft): Promise<ProviderView[]>;
+    update(input: {
+      id: string;
+      patch: {
+        displayName?: string;
+        baseUrl?: string;
+        allowPrivateNetwork?: boolean;
+        enabled?: boolean;
+      };
+      apiKey?: string;
+    }): Promise<ProviderView[]>;
+    remove(id: string): Promise<ProviderView[]>;
+    test(input: {
+      id?: string;
+      baseUrl: string;
+      apiKey?: string;
+      allowPrivateNetwork?: boolean;
+    }): Promise<ProviderTestResult>;
+  };
 }
 
 declare global {

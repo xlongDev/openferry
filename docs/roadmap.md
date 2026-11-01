@@ -29,10 +29,14 @@
 
 - [x] Electron 主进程内嵌网关 + 受限 IPC + preload 白名单
 - [x] 概览页接真实逻辑（状态、启停、重启、最近日志）
-- [ ] Providers / Models / Clients / Logs / Settings 页面
-- [ ] SQLite 版本化迁移（`node:sqlite`）
-- [ ] `safeStorage` 凭据存储
-- [ ] 供应商 CRUD + 连接测试
+- [x] 供应商页：增删改查、启用切换、连接测试
+- [x] SQLite 版本化迁移（`node:sqlite`），失败整体回滚
+- [x] `safeStorage` 凭据存储（不可用时拒绝保存，不退回明文）
+- [x] 网关运行时热替换供应商列表
+- [ ] Models / Clients / Logs / Settings 页面
+- [ ] 模型目录缓存与价格状态
+
+**已完成部分的验收**：表单 → IPC → SQLite → safeStorage → 网关热替换 → 列表刷新 全链路无 mock；迁移回滚与幂等有测试；数据库里查不到密钥。证据见 `docs/release/phase-reports/phase-3.md`。
 
 **验收**：UI 上的每个控件都能改变真实状态；关掉应用网关随之停止。
 

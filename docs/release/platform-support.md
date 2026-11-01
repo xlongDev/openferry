@@ -27,6 +27,9 @@
 | 渲染层渲染 | 通过 | CDP 读取到 `h1=概览`、状态徽章`运行中`、5 个指标、无 console 异常 |
 | 网关随应用启动 | 通过 | `curl 127.0.0.1:41980/healthz` 返回 `{"status":"ok","version":"0.1.0"}` |
 | 网关停止/重启按钮 | 通过 | 状态切换后按钮 disabled 状态正确 |
+| 供应商 CRUD（桌面端） | 通过 | 经真实 IPC：创建 → 列表刷新 → 网关 `providers` 立即包含新 id → 停用 → 删除 |
+| 密钥加密存储 | 通过 | `safeStorage` 可用（`secrets: "encrypted"`），数据库内查不到密钥 |
+| 连接测试（失败路径） | 通过 | 指向 `https://127.0.0.1:9/v1` 返回 `ok:false` 且带错误，说明真的发了请求 |
 | 网关端到端（非流式 / 流式 / 工具调用） | 通过 | `tests/integration/gateway.test.ts`，走真实 HTTP + 假上游 |
 | 客户端断开取消上游 | 通过 | `tests/integration/cancellation.test.ts` 断言上游收到 abort |
 

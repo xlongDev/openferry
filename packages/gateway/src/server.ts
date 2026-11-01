@@ -59,6 +59,8 @@ export interface Gateway {
   start(): Promise<{ url: string; port: number }>;
   stop(): Promise<void>;
   stats(): GatewayStats;
+  /** 运行时替换供应商列表（配置变更后调用），不影响进行中的请求。 */
+  setProviders(providers: ProviderAdapter[]): void;
   readonly logger: LoggerHandle;
 }
 
@@ -110,12 +112,16 @@ export function createGateway(options: GatewayOptions): Gateway {
   const maxConcurrency = options.maxConcurrency ?? 16;
 
   const providers = new Map<string, ProviderAdapter>();
-  for (const provider of options.providers) {
-    if (providers.has(provider.id)) {
-      throw new Error(`duplicate provider id "${provider.id}"`);
+  const install = (list: ProviderAdapter[]): void => {
+    const next = new Map<string, ProviderAdapter>();
+    for (const provider of list) {
+      if (next.has(provider.id)) throw new Error(`duplicate provider id "${provider.id}"`);
+      next.set(provider.id, provider);
     }
-    providers.set(provider.id, provider);
-  }
+    providers.clear();
+    for (const [id, provider] of next) providers.set(id, provider);
+  };
+  install(options.providers);
 
   let server: Server | null = null;
   let port = options.port ?? 0;
@@ -453,6 +459,10 @@ export function createGateway(options: GatewayOptions): Gateway {
 
   return {
     logger,
+    setProviders(list: ProviderAdapter[]) {
+      install(list);
+      logger.info('providers.reloaded', { providers: [...providers.keys()] });
+    },
     async start() {
       if (server) throw new Error('gateway already started');
       server = createServer((req, res) => {

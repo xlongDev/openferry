@@ -10,4 +10,12 @@ contextBridge.exposeInMainWorld('openferry', {
   recentLogs: (limit) => ipcRenderer.invoke('logs:recent', { limit }),
   appInfo: () => ipcRenderer.invoke('app:info'),
   openDataDir: () => ipcRenderer.invoke('app:open-data-dir'),
+
+  providers: {
+    list: () => ipcRenderer.invoke('providers:list'),
+    create: (input) => ipcRenderer.invoke('providers:create', input),
+    update: (input) => ipcRenderer.invoke('providers:update', input),
+    remove: (id) => ipcRenderer.invoke('providers:remove', { id }),
+    test: (input) => ipcRenderer.invoke('providers:test', input),
+  },
 });

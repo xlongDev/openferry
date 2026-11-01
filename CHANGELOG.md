@@ -4,6 +4,24 @@
 
 ## [Unreleased]
 
+### Added
+
+- `@openferry/storage`：`node:sqlite` 数据库、版本化迁移（事务 + 失败回滚）、`ProviderRepository`。
+- `@openferry/secrets`：`SecretStore` 抽象、内存实现、文件实现（CLI 兜底，0600）。
+- 桌面端供应商管理：新建 / 编辑 / 停用 / 删除 / 连接测试，密钥写入系统凭据存储。
+- 网关 `setProviders()`：配置变更即时生效，不需要重启网关。
+- 首次运行从旧 `config.json` 导入一次供应商（数据库为空时）。
+
+### Changed
+
+- 概览页拆分为独立组件；「供应商」导航项已启用。
+- 密钥 API 改用 Electron 45 的异步变体（`isAsyncEncryptionAvailable` / `encryptStringAsync` / `decryptStringAsync`）。
+
+### Security
+
+- 数据库只存 `credentialRef`，不存密钥；有测试断言表里查不到 `sk-…` 形态的字符串。
+- 系统凭据存储不可用时拒绝保存密钥，不退回明文文件。
+
 ## [0.1.0] - 2026-11-02
 
 首个骨架版本。目标是把「协议正确 + 安全边界 + 可测试」的地基打好，而不是堆功能。
