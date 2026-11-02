@@ -34,7 +34,7 @@
 - [x] `safeStorage` 凭据存储（不可用时拒绝保存，不退回明文）
 - [x] 网关运行时热替换供应商列表
 - [x] 模型页：目录刷新、筛选搜索、单项探测、能力徽章
-- [ ] Clients / Logs / Settings 页面
+- [x] 客户端页、日志页、设置页（含深色/浅色/跟随系统）
 
 **已完成部分的验收**：表单 → IPC → SQLite → safeStorage → 网关热替换 → 列表刷新 全链路无 mock；迁移回滚与幂等有测试；数据库里查不到密钥。证据见 `docs/release/phase-reports/phase-3.md`。
 

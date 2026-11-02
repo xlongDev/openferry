@@ -158,6 +158,7 @@ export interface OpenFerryApi {
       allowPrivateNetwork?: boolean;
     }): Promise<ProviderTestResult>;
   };
+  exportDiagnostics(): Promise<{ file: string }>;
   clients: {
     state(): Promise<ClientState>;
     preview(modelIds: string[]): Promise<ClientPlan>;

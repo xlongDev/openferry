@@ -2,19 +2,22 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import type { JSX } from 'react';
 import { Overview, StatusPill } from './Overview.js';
 import { Clients } from './Clients.js';
+import { Logs } from './Logs.js';
+import { Settings } from './Settings.js';
 import { Models } from './Models.js';
 import { Providers } from './Providers.js';
+import { applyTheme, loadTheme, watchSystemTheme, type ThemePref } from './theme.js';
 import type { LogRecord, StatusPayload } from './types.js';
 
-type Tab = 'overview' | 'providers' | 'models' | 'clients';
+type Tab = 'overview' | 'providers' | 'models' | 'clients' | 'logs' | 'settings';
 
 const NAV: Array<{ id: string; label: string; ready: boolean }> = [
   { id: 'overview', label: '概览', ready: true },
   { id: 'providers', label: '供应商', ready: true },
   { id: 'models', label: '模型', ready: true },
   { id: 'clients', label: '客户端', ready: true },
-  { id: 'logs', label: '日志', ready: false },
-  { id: 'settings', label: '设置', ready: false },
+  { id: 'logs', label: '日志', ready: true },
+  { id: 'settings', label: '设置', ready: true },
 ];
 
 const PAGE_META: Record<Tab, { title: string; sub: string }> = {
@@ -22,6 +25,8 @@ const PAGE_META: Record<Tab, { title: string; sub: string }> = {
   providers: { title: '供应商', sub: '上游端点、密钥引用与启用状态。' },
   models: { title: '模型', sub: '从供应商拉到的目录，以及带有效期的能力结论。' },
   clients: { title: '客户端', sub: '把模型写进客户端配置，写前备份、写后可恢复。' },
+  logs: { title: '日志', sub: '结构化事件，不含提示词、模型输出与凭据。' },
+  settings: { title: '设置', sub: '外观与运行信息。' },
 };
 
 function errorMessage(error: unknown): string {
@@ -38,6 +43,7 @@ export function App(): JSX.Element {
   const [actionError, setActionError] = useState<string | null>(null);
   const [tab, setTab] = useState<Tab>('overview');
   const [now, setNow] = useState(() => Date.now());
+  const [theme, setTheme] = useState<ThemePref>(() => loadTheme());
   const mounted = useRef(true);
 
   const api = typeof window === 'undefined' ? undefined : window.openferry;
@@ -54,6 +60,11 @@ export function App(): JSX.Element {
       setActionError(errorMessage(error));
     }
   }, [api]);
+
+  useEffect(() => {
+    applyTheme(theme);
+    return watchSystemTheme(() => theme);
+  }, [theme]);
 
   useEffect(() => {
     mounted.current = true;
@@ -115,7 +126,11 @@ export function App(): JSX.Element {
               className={`nav-item ${tab === item.id ? 'is-active' : ''}`}
               disabled={!item.ready}
               onClick={() => {
-                if (['overview', 'providers', 'models', 'clients'].includes(item.id)) {
+                if (
+                  ['overview', 'providers', 'models', 'clients', 'logs', 'settings'].includes(
+                    item.id,
+                  )
+                ) {
                   setTab(item.id as Tab);
                 }
               }}
@@ -169,8 +184,12 @@ export function App(): JSX.Element {
           <Providers running={status.state === 'running'} />
         ) : tab === 'models' ? (
           <Models running={status.state === 'running'} />
-        ) : (
+        ) : tab === 'clients' ? (
           <Clients running={status.state === 'running'} />
+        ) : tab === 'logs' ? (
+          <Logs logs={logs} />
+        ) : (
+          <Settings status={status} theme={theme} onThemeChange={setTheme} />
         )}
       </main>
     </div>

@@ -565,6 +565,36 @@ function registerIpc(): void {
     return listModels();
   });
 
+  guarded('diagnostics:export', async () => {
+    const payload = {
+      generatedAt: new Date().toISOString(),
+      version: app.getVersion(),
+      platform: `${process.platform}-${process.arch}`,
+      node: process.versions.node,
+      electron: process.versions.electron,
+      gateway: status(),
+      providers: requireDb()
+        .providers.list()
+        .map((provider) => ({
+          id: provider.id,
+          displayName: provider.displayName,
+          baseUrl: provider.baseUrl,
+          enabled: provider.enabled,
+          allowPrivateNetwork: provider.allowPrivateNetwork,
+          hasCredential: provider.credentialRef !== null,
+        })),
+      models: requireDb().models.list().length,
+      // 日志在写入环形缓冲时已经过 redact()，这里不再二次处理。
+      logs: logger.recent(200),
+    };
+
+    const file = join(DATA_DIR, `diagnostics-${Date.now()}.json`);
+    await writeFile(file, JSON.stringify(payload, null, 2), { encoding: 'utf8', mode: 0o600 });
+    logger.info('diagnostics.exported', { file });
+    shell.showItemInFolder(file);
+    return { file };
+  });
+
   guarded('clients:state', async () => clientState());
 
   guarded('clients:preview', async (payload) => {

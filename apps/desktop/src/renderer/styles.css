@@ -1096,3 +1096,93 @@ button {
   text-overflow: ellipsis;
   white-space: nowrap;
 }
+
+/* ---------- 浅色令牌 ---------- */
+
+[data-theme='light'] {
+  --bg: #f7f8f9;
+  --surface: #ffffff;
+  --surface-raised: #f2f4f5;
+  --line: #e4e7ea;
+  --line-strong: #d3d8dd;
+  --text: #1a1d20;
+  --text-dim: #59616a;
+  --text-faint: #858d96;
+  --accent: #1f8f6f;
+  --accent-ink: #ffffff;
+  --accent-soft: rgba(31, 143, 111, 0.1);
+  --danger: #c0392f;
+  --danger-soft: rgba(192, 57, 47, 0.1);
+  --warn: #94651a;
+  --warn-soft: rgba(148, 101, 26, 0.12);
+}
+
+[data-theme='light'] .btn:hover:not(:disabled) {
+  background: #eef1f3;
+  border-color: #c3c9cf;
+}
+
+[data-theme='light'] .input:focus {
+  background: #ffffff;
+}
+
+[data-theme='light'] .input::placeholder {
+  color: #a7aeb6;
+}
+
+[data-theme='light'] .btn-primary:hover:not(:disabled) {
+  background: #1a7d60;
+  border-color: #1a7d60;
+}
+
+[data-theme='light'] .test-fail,
+[data-theme='light'] .cap-fail,
+[data-theme='light'] .btn-danger,
+[data-theme='light'] .banner-error {
+  color: #9c2f27;
+}
+
+[data-theme='light'] .banner-info {
+  background: rgba(31, 106, 191, 0.08);
+  border-color: rgba(31, 106, 191, 0.22);
+  color: #1f5b9e;
+}
+
+[data-theme='light'] .banner-warn {
+  color: #7a5314;
+}
+
+/* ---------- 日志与设置 ---------- */
+
+.log-list-full {
+  max-height: none;
+}
+
+.kv {
+  display: grid;
+  grid-template-columns: 140px minmax(0, 1fr);
+  gap: 8px 16px;
+  margin: 0;
+  font-size: 12px;
+}
+
+.kv dt {
+  color: var(--text-faint);
+}
+
+.kv dd {
+  margin: 0;
+  color: var(--text);
+}
+
+.kv dd.wrap {
+  overflow-wrap: anywhere;
+}
+
+.plain-list {
+  margin: 0;
+  padding-left: 18px;
+  color: var(--text-faint);
+  font-size: 12px;
+  line-height: 1.8;
+}

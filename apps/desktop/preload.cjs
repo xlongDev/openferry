@@ -19,6 +19,8 @@ contextBridge.exposeInMainWorld('openferry', {
     test: (input) => ipcRenderer.invoke('providers:test', input),
   },
 
+  exportDiagnostics: () => ipcRenderer.invoke('diagnostics:export'),
+
   clients: {
     state: () => ipcRenderer.invoke('clients:state'),
     preview: (modelIds) => ipcRenderer.invoke('clients:preview', { modelIds }),
