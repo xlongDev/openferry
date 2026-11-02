@@ -682,6 +682,8 @@ function createWindow(): void {
 app.whenReady().then(async () => {
   await mkdir(DATA_DIR, { recursive: true });
   db = openDatabase(DB_PATH);
+  // 只清掉过期超过 7 天的探测记录：既不让表无限增长，也保留最近的历史供排查。
+  db.probes.prune(new Date(Date.now() - 7 * 24 * 3_600_000).toISOString());
   secrets = new SafeStorageSecretStore(SECRETS_PATH);
   if (!(await safeStorage.isAsyncEncryptionAvailable())) {
     logger.warn('secrets.unavailable', { message: '系统凭据存储不可用，密钥无法保存' });

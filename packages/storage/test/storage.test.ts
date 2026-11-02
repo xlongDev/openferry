@@ -225,6 +225,18 @@ describe('models and probes', () => {
     db.close();
   });
 
+  it('prunes runs that expired long ago and keeps fresh ones', () => {
+    const db = openDatabase(':memory:');
+    seed(db);
+    db.probes.record({ ...probe('p/a'), expiresAt: '2020-01-01T00:00:00.000Z' });
+    db.probes.record(probe('p/a'));
+
+    const removed = db.probes.prune(new Date().toISOString());
+    expect(removed).toBe(1);
+    expect(db.probes.historyForModel('p/a')).toHaveLength(1);
+    db.close();
+  });
+
   it('deletes probe history when the provider goes away', () => {
     const db = openDatabase(':memory:');
     seed(db);
